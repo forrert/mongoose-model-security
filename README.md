@@ -1,5 +1,7 @@
 # mongoose-model-security
 
+[![Build Status](https://travis-ci.org/forrert/mongoose-model-security.svg?branch=master)](https://travis-ci.org/forrert/mongoose-model-security)
+
 Simple data driven access control layer for [mongoose](https://github.com/LearnBoost/mongoose).
 
 ## Mongoose Security Made Easy
