@@ -14,7 +14,7 @@
     "access control"
   ],
   "author": "Thomas Forrer <forrert@gmail.com>",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "hooks": "^0.3.2",
     "lodash": "~2.4.1",
