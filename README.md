@@ -1,8 +1,15 @@
 # mongoose-model-security
 
 [![Build Status](https://travis-ci.org/forrert/mongoose-model-security.svg?branch=master)](https://travis-ci.org/forrert/mongoose-model-security)
+[![Coverage Status](https://coveralls.io/repos/forrert/mongoose-model-security/badge.svg?branch=master)](https://coveralls.io/r/forrert/mongoose-model-security?branch=master)
 
 Simple data driven access control layer for [mongoose](https://github.com/LearnBoost/mongoose).
+
+## Introduction
+
+This node.js module for [mongoose](https://github.com/LearnBoost/mongoose) is
+still under development. API might change within the ```0.*``` version.
+Changes are documented in [CHANGELOG.md](https://github.com/forrert/mongoose-model-security/blob/master/CHANGELOG.md).
 
 ## Mongoose Security Made Easy
 1. Define a policy for each of your models
@@ -11,7 +18,7 @@ Simple data driven access control layer for [mongoose](https://github.com/LearnB
   
   security.buildPolicy().model('MyModel').
     read({someProperty: 'someValue'}).
-    write(function() {
+    update(function() {
       // some complicated logic...
       if (satisfied) {
         return true;
@@ -19,8 +26,8 @@ Simple data driven access control layer for [mongoose](https://github.com/LearnB
         return false;
       }
     }).
-    write({someOtherProperty: {$in: ['value1', 'value2']}}).
-    delete(false).
+    update({someOtherProperty: {$in: ['value1', 'value2']}}).
+    remove(false).
     create(true);
   ```
 
@@ -53,12 +60,61 @@ Simple data driven access control layer for [mongoose](https://github.com/LearnB
     myDocuments[0].someProperty = 'someNewValue';
     myDocuments[0].save(function(err) {
       // will return with an error and not save the document, if none of the
-      // write conditions from the policy file are met
+      // update conditions from the policy file are met
     });
   });
   ```
-## License
 
+## Concept
+Using this module in combination with [mongoose](https://github.com/LearnBoost/mongoose)
+allows defining access permissions (create, read, update, remove) for all models.
+It acts transparently on all interactions with mongoose, i.e. you should not have
+to change already implemented business code, in order to have permissions checked.
+
+### Queries
+Queries are automatically decorated with conditions as defined in the model's
+policy. Queries will always only return documents that the current user has
+permission to read.
+
+### Create / Update / Remove
+Each of these operations are automatically intercepted and permissions are tested
+before the operation is executed. The provided callback is called with an error
+if the current user has insufficient permissions.
+
+### Defining a Policy
+A policy can be defined per model and per permission (create, read, update,
+remove). This is done by providing rules. A rule might be any of the following:
+
+- a boolean value (true if the permission is to be granted, false otherwise)
+- a mongodb query object (see [here](http://docs.mongodb.org/manual/tutorial/query-documents/))
+- a promise resolving to any of the above
+- a function returning any of the above
+
+All provided rules for the same model and permission are ```or```-combined when
+evaluated, i.e. the permission is granted if **any** of the provided conditions
+are met.
+
+### Parameters
+When using functions to return rules (see above), a parameters object is passed
+in as the only argument. The parameters object contains the following properties:
+
+- **target**: the document that is being tested (for create, update and delete
+  permissions only).
+- **user defined**: user defined parameters can be provided using the following
+  method:
+  ```javascript
+  var security = require('mongoose-model-security');
+
+  security.addModelProvider(function() {
+    var myValue;
+    return {
+      myParam: myValue
+    };
+  });
+  ```
+  All defined model providers will be called before the rules are evaluated.
+
+## License
 Copyright (c) 2015 Thomas Forrer
 
 Permission is hereby granted, free of charge, to any person obtaining

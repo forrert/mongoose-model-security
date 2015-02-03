@@ -139,10 +139,11 @@ Security.prototype.getPlugin = function() {
 };
 
 /**
+ * @param {String} modelName name of a model
  * @returns {PolicyBuilder|*} a builder to help build the policy for a model
  */
-Security.prototype.buildPolicy = function() {
-    return this.policyBuilder;
+Security.prototype.buildPolicy = function(modelName) {
+    return this.policyBuilder.model(modelName);
 };
 
 /**

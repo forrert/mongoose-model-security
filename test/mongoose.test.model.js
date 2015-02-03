@@ -32,12 +32,12 @@ exports.simpleModel = function(mongoose) {
 };
 
 exports.policy = function(security) {
-    security.buildPolicy().model('Activity').
+    security.buildPolicy('Activity').
         read({categories: {$in: ['sport', 'tech']}}).
         read({name: 'Concert'}).
-        write({categories: 'music'}).
-        delete({name: 'Dance class'});
-    security.buildPolicy().model('SimpleModel').
+        update({categories: 'music'}).
+        remove({name: 'Dance class'});
+    security.buildPolicy('SimpleModel').
         read(true).
         create(true);
 };
@@ -60,40 +60,40 @@ exports.testData = function(security, mongoose, Activity) {
             categories: ['sport']
         }, {
             read: true,
-            write: false,
-            'delete': false
+            update: false,
+            remove: false
         }),
         createActivity({
             name: 'Skiing weekend',
             categories: ['sport']
         }, {
             read: true,
-            write: false,
-            'delete': false
+            update: false,
+            remove: false
         }),
         createActivity({
             name: 'Book reading',
             categories: ['culture']
         }, {
             read: false,
-            write: false,
-            'delete': false
+            update: false,
+            remove: false
         }),
         createActivity({
             name: 'Concert',
             categories: ['culture', 'music']
         }, {
             read: true,
-            write: true,
-            'delete': false
+            update: true,
+            remove: false
         }),
         createActivity({
             name: 'Dance class',
             categories: ['music', 'culture']
         }, {
             read: false,
-            write: true,
-            'delete': true
+            update: true,
+            remove: true
         })
     ]).then(function(testData) {
         return _.reduce(testData, function(object, item) {

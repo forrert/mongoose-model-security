@@ -22,11 +22,11 @@ var testDocuments = {
         yes: [],
         no: []
     },
-    write: {
+    update: {
         yes: [],
         no: []
     },
-    delete: {
+    remove: {
         yes: [],
         no: []
     }
@@ -101,9 +101,9 @@ describe('Security Spec:', function() {
             });
         });
         it('returns false for permission without rule on document', function(done) {
-            var aUndeletableDocument = testDocuments.delete.no[0];
+            var aUndeletableDocument = testDocuments.remove.no[0];
 
-            security.askPermission(aUndeletableDocument, 'delete').then(function(decision) {
+            security.askPermission(aUndeletableDocument, 'remove').then(function(decision) {
                 /*jshint -W030 */
                 //noinspection BadExpressionStatementJS
                 decision.should.be.not.ok;
@@ -117,12 +117,12 @@ describe('Security Spec:', function() {
         it('returns correct permissions for readable document', function(done) {
             var aReadableDocument = testDocuments.read.yes[0];
 
-            security.getPermissions(aReadableDocument, ['read', 'write', 'delete']).then(function(permissions) {
+            security.getPermissions(aReadableDocument, ['read', 'update', 'remove']).then(function(permissions) {
                 should.exist(permissions);
                 permissions.should.be.eql({
                     read: true,
-                    write: false,
-                    'delete': false
+                    update: false,
+                    remove: false
                 });
                 done();
             }).catch(function(err) {
@@ -132,12 +132,12 @@ describe('Security Spec:', function() {
         it('returns correct permissions for unreadable document', function(done) {
             var aUnreadableDocument = testDocuments.read.no[0];
 
-            security.getPermissions(aUnreadableDocument, ['read', 'write', 'delete']).then(function(permissions) {
+            security.getPermissions(aUnreadableDocument, ['read', 'update', 'remove']).then(function(permissions) {
                 should.exist(permissions);
                 permissions.should.be.eql({
                     read: false,
-                    write: false,
-                    'delete': false
+                    update: false,
+                    remove: false
                 });
                 done();
             }).catch(function(err) {
@@ -221,20 +221,20 @@ describe('Security Spec:', function() {
         });
     });
     describe('Save middleware Spec:', function() {
-        it('allows to save writeable document', function(done) {
-            var aWritableDocument = testDocuments.write.yes[0];
-            var newName = aWritableDocument.name + ' (writable)';
-            aWritableDocument.name = newName;
-            aWritableDocument.save(function(err, document) {
+        it('allows to save updateable document', function(done) {
+            var aUpdateableDocument = testDocuments.update.yes[0];
+            var newName = aUpdateableDocument.name + ' (updateable)';
+            aUpdateableDocument.name = newName;
+            aUpdateableDocument.save(function(err, document) {
                 if (err) return done(err);
                 document.name.should.be.eql(newName);
                 done();
             });
         });
-        it('denies to save a non writeable document', function(done) {
-            var aNonWriteableDocument = testDocuments.write.no[0];
-            aNonWriteableDocument.name = 'non writeable';
-            aNonWriteableDocument.save(function(err) {
+        it('denies to save a non updateable document', function(done) {
+            var aNonUpdateableDocument = testDocuments.update.no[0];
+            aNonUpdateableDocument.name = 'non updateable';
+            aNonUpdateableDocument.save(function(err) {
                 should.exist(err);
                 should.exist(err.reason);
                 err.reason.should.be.eql('Unauthorized');
@@ -242,13 +242,13 @@ describe('Security Spec:', function() {
             });
         });
     });
-    describe('Delete middleware Spec:', function() {
+    describe('Remove middleware Spec:', function() {
         it('allows to remove deletable document', function(done) {
-            var aDeletableDocument = testDocuments.delete.yes[0];
+            var aDeletableDocument = testDocuments.remove.yes[0];
             var id = aDeletableDocument._id;
             aDeletableDocument.remove(function(err) {
                 if (err) return done(err);
-                // make sure the document is actually deleted...
+                // make sure the document is actually removed...
                 security.securityManager.privileged(function() {
                     TestModel.find({_id: id}).exec(function(err, documents) {
                         if (err) return done(err);
@@ -258,10 +258,10 @@ describe('Security Spec:', function() {
                 });
             });
         });
-        it('denies to remove a undeletable document', function(done) {
-            var aUndeletableDocument = testDocuments.delete.no[0];
-            var id = aUndeletableDocument._id;
-            aUndeletableDocument.remove(function(err) {
+        it('denies to remove a unremoveable document', function(done) {
+            var aUnremoveableDocument = testDocuments.remove.no[0];
+            var id = aUnremoveableDocument._id;
+            aUnremoveableDocument.remove(function(err) {
                 should.exist(err);
                 should.exist(err.reason);
                 err.reason.should.be.eql('Unauthorized');

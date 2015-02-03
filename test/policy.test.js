@@ -64,7 +64,7 @@ describe('Policy Spec:', function() {
             assertCondition(condition, unsatisfiableRule, done);
         });
         it('returns unsatisfiable rule for another permission', function(done) {
-            var anotherPermission = 'write';
+            var anotherPermission = 'update';
 
             var condition = policy.getCondition(aModel, anotherPermission);
 
@@ -150,7 +150,7 @@ describe('Policy Spec:', function() {
             someRules = [
                 {permission: 'read', rule: {userId: 'tester'}},
                 {permission: 'read', rule: {category: 'Sport'}},
-                {permission: 'write', rule: {date: {$gte: '2014-01-05'}}}
+                {permission: 'update', rule: {date: {$gte: '2014-01-05'}}}
             ];
 
         var policy = new policyCtor(noModelProviders, securityManager);
