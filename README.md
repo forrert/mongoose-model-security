@@ -27,7 +27,7 @@ Please note that this module does not automatically install `mongoose`.
   ```javascript
   var security = require('mongoose-model-security');
   
-  security.buildPolicy().model('MyModel').
+  security.buildPolicy('MyModel').
     read({someProperty: 'someValue'}).
     update(function(parameters) {
       // some complicated logic...

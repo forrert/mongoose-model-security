@@ -13,8 +13,8 @@ gulp.task('test', function() {
         }));
 });
 
-gulp.task('lint', function() {
-    return gulp.src('./lib/*.js')
+gulp.task('lint-src', function() {
+    return gulp.src(['*.js', './lib/*.js'])
         .pipe(jshint({
                 node: true
             }
@@ -22,3 +22,15 @@ gulp.task('lint', function() {
         .pipe(jshint.reporter(stylish))
         .pipe(jshint.reporter('fail'));
 });
+
+gulp.task('lint-test', function() {
+    return gulp.src(['./test/*.js'])
+        .pipe(jshint({
+            node: true,
+            mocha: true
+        }))
+        .pipe(jshint.reporter(stylish))
+        .pipe(jshint.reporter('fail'));
+});
+
+gulp.task('lint', ['lint-src', 'lint-test']);

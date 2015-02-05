@@ -20,7 +20,7 @@ SecurityMock.prototype.buildPolicy = function(modelName) {
         grantAll: function() {
             self.grantAll.push(modelName);
         }
-    }
+    };
 };
 
 var securityMock;
@@ -80,6 +80,8 @@ describe('PolicyLoader Spec:', function() {
         policyLoader(securityMock, aMongooseFake, anotherConfig);
 
         securityMock.callers.should.be.eql([aModelName]);
+        /*jshint -W030 */
+        //noinspection BadExpressionStatementJS
         defaultPolicyCalled.should.be.ok;
         done();
     });

@@ -144,6 +144,22 @@ describe('Policy Spec:', function() {
             assertCondition(condition, anotherRule, done);
         });
     });
+    describe('Promise as rules Spec:', function() {
+        var aModel = 'Activity',
+            aPermission = 'read';
+
+        it('returns condition provided by promise rule', function(done) {
+            var aRule = {userId: 'tester'};
+            var aPromiseRule =  promise.resolve(aRule);
+
+            var policy = new policyCtor(noModelProviders, securityManager);
+            policy.addRule(aModel, aPermission, aPromiseRule);
+
+            var condition = policy.getCondition(aModel, aPermission);
+
+            assertCondition(condition, aRule, done);
+        });
+    });
     describe('Multiple rules Spec:', function() {
         var aModel = 'Activity',
             aPermission = 'read',
@@ -212,6 +228,19 @@ describe('Policy Spec:', function() {
                 should.exist(error);
                 done();
             });
+        });
+    });
+    describe('#addRule Spec:', function() {
+        it('throws an error when adding a rule for an invalid permission', function(done) {
+            var policy = new policyCtor(noModelProviders, securityManager);
+            var aRule = {userId: 'tester'},
+                aModel = 'Activity',
+                aInvalidPermission = 'write';
+
+            should(function() {
+                policy.addRule(aModel, aInvalidPermission, aRule);
+            }).throw();
+            done();
         });
     });
 });
