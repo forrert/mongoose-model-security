@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.4 (Feb 25, 2015)
+- update some dependencies
+
 ## 0.0.3 (Feb 3, 2015)
 - bug fixes
 
