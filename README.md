@@ -3,13 +3,17 @@
 [![Build Status](https://travis-ci.org/forrert/mongoose-model-security.svg?branch=master)](https://travis-ci.org/forrert/mongoose-model-security)
 [![Coverage Status](https://coveralls.io/repos/forrert/mongoose-model-security/badge.svg?branch=master)](https://coveralls.io/r/forrert/mongoose-model-security?branch=master)
 
-Simple data driven access control layer for [mongoose](https://github.com/LearnBoost/mongoose).
-Integrates seamlessly with the [MEAN.JS](http://meanjs.org/) stack.
+Data driven access control layer for [mongoose](https://github.com/LearnBoost/mongoose).
+
+* Define access rules to models based on the content of a document
+* Define access rules as MongoDB query conditions
+* Handle security globally and transparently
+* Integrates seamlessly with the [MEAN.JS](http://meanjs.org/) stack.
 
 ## Introduction
 
 This node.js module for [mongoose](https://github.com/LearnBoost/mongoose) is
-still under development. API might change within the ```0.*``` version.
+still under development.
 Changes are documented in [CHANGELOG.md](https://github.com/forrert/mongoose-model-security/blob/master/CHANGELOG.md).
 
 If you are using this module and experiencing problems, please report them
