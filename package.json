@@ -1,7 +1,7 @@
 {
   "name": "mongoose-model-security",
   "version": "0.0.4",
-  "description": "Simple data driven access control layer for mongoose.",
+  "description": "Data driven access control layer for mongoose.",
   "main": "index.js",
   "scripts": {
     "test": "gulp test",
