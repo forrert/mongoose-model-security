@@ -156,4 +156,6 @@ Security.prototype.addModelProvider = function(modelProvider) {
     this.modelProviders.push(modelProvider);
 };
 
+Security.prototype.unauthorized = require('./lib/unauthorized');
+
 module.exports = new Security();

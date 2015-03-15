@@ -236,8 +236,7 @@ describe('Security Spec:', function() {
             aNonUpdateableDocument.name = 'non updateable';
             aNonUpdateableDocument.save(function(err) {
                 should.exist(err);
-                should.exist(err.reason);
-                err.reason.should.be.eql('Unauthorized');
+                err.should.be.an.instanceOf(security.unauthorized);
                 done();
             });
         });
@@ -263,8 +262,7 @@ describe('Security Spec:', function() {
             var id = aUnremoveableDocument._id;
             aUnremoveableDocument.remove(function(err) {
                 should.exist(err);
-                should.exist(err.reason);
-                err.reason.should.be.eql('Unauthorized');
+                err.should.be.an.instanceOf(security.unauthorized);
                 // make sure the document was not removed
                 security.securityManager.privileged(function() {
                     TestModel.find({_id: id}).exec(function(err, documents) {
@@ -300,8 +298,7 @@ describe('Security Spec:', function() {
             });
             newDocument.save(function(err, document) {
                 should.exist(err);
-                should.exist(err.reason);
-                err.reason.should.be.eql('Unauthorized');
+                err.should.be.an.instanceOf(security.unauthorized);
                 done();
             });
         });
