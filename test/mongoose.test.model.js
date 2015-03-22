@@ -31,6 +31,16 @@ exports.simpleModel = function(mongoose) {
     return mongoose.model('SimpleModel', SimpleSchema);
 };
 
+module.exports.modelWithRelation = function(mongoose) {
+    var Schema = mongoose.Schema;
+    return mongoose.model('ModelWithRelation', new Schema({
+        relatedWith: {
+            type: Schema.ObjectId,
+            ref: 'Activity'
+        }
+    }));
+};
+
 exports.policy = function(security) {
     security.buildPolicy('Activity').
         read({categories: {$in: ['sport', 'tech']}}).
@@ -38,6 +48,9 @@ exports.policy = function(security) {
         update({categories: 'music'}).
         remove({name: 'Dance class'});
     security.buildPolicy('SimpleModel').
+        read(true).
+        create(true);
+    security.buildPolicy('ModelWithRelation').
         read(true).
         create(true);
 };
@@ -107,6 +120,17 @@ module.exports.simpleModelData = function(SimpleModel) {
         SimpleModel.create({
             name: 'test'
         }, function(err, document) {
+            if (err) return reject(err);
+            resolve(document);
+        });
+    });
+};
+
+module.exports.createRelatedDocument = function(ModelWithRelation, document) {
+    return new promise(function(resolve, reject) {
+        new ModelWithRelation({
+            relatedWith: document
+        }).save(function(err, document) {
             if (err) return reject(err);
             resolve(document);
         });

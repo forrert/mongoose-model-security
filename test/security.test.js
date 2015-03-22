@@ -14,6 +14,7 @@ security.init();
 
 var TestModel = testModel.model(mongoose);
 var SimpleModel = testModel.simpleModel(mongoose);
+var ModelWithRelation = testModel.modelWithRelation(mongoose);
 
 testModel.policy(security);
 
@@ -217,6 +218,80 @@ describe('Security Spec:', function() {
                     should.not.exist(document);
                     done();
                 });
+            });
+        });
+        describe('#findOne:', function() {
+            it('returns readable document for findOne query', function(done) {
+                var aReadableDocument = testDocuments.read.yes[0];
+                TestModel.findOne({name: aReadableDocument.name}).exec(function(err, document) {
+                    if (err) return done(err);
+                    should.exist(document);
+                    document.should.be.eql(aReadableDocument);
+                    done();
+                });
+            });
+            it('returns readable document for findOne query with callback', function(done) {
+                var aReadableDocument = testDocuments.read.yes[0];
+                TestModel.findOne({name: aReadableDocument.name}, function(err, document) {
+                    if (err) return done(err);
+                    should.exist(document);
+                    document.should.be.eql(aReadableDocument);
+                    done();
+                });
+            });
+            it('does not return unreadable document for findOne query', function(done) {
+                var aUnreadableDocument = testDocuments.read.no[0];
+                TestModel.findOne({name: aUnreadableDocument.name}).exec(function(err, document) {
+                    if (err) return done(err);
+                    should.not.exist(document);
+                    done();
+                });
+            });
+            it('does not return unreadable document for findOne query with callback', function(done) {
+                var aUnreadableDocument = testDocuments.read.no[0];
+                TestModel.findOne({name: aUnreadableDocument.name}, function(err, document) {
+                    if (err) return done(err);
+                    should.not.exist(document);
+                    done();
+                });
+            });
+        });
+        describe('#populate:', function() {
+            var documentWithReadableRelatedDocument;
+            var documentWithUnreadableRelatedDocument;
+
+            before(function(done) {
+                promise.all([
+                    testModel.createRelatedDocument(ModelWithRelation, testDocuments.read.yes[0]).
+                        then(function(document) {
+                            documentWithReadableRelatedDocument = document;
+                        }),
+                    testModel.createRelatedDocument(ModelWithRelation, testDocuments.read.no[0]).
+                        then(function(document) {
+                            documentWithUnreadableRelatedDocument = document;
+                        })
+                ]).then(function() {
+                    done();
+                }).catch(done);
+            });
+            it('returns readable documents when populating a query', function(done) {
+                ModelWithRelation.findById(documentWithReadableRelatedDocument.id).
+                    populate('relatedWith').
+                    exec(function(err, document) {
+                        if (err) return done(err);
+                        should.exist(document.relatedWith);
+                        should.exist(document.relatedWith.name);
+                        done();
+                    });
+            });
+            it('does not return unreadable documents when populating a query', function(done) {
+                ModelWithRelation.findById(documentWithUnreadableRelatedDocument.id).
+                    populate('relatedWith').
+                    exec(function(err, document) {
+                        if (err) return done(err);
+                        should.not.exist(document.relatedWith);
+                        done();
+                    });
             });
         });
     });
