@@ -33,6 +33,8 @@ Please note that this module does not automatically install `mongoose`.
   
   security.buildPolicy('MyModel').
     read({someProperty: 'someValue'}).
+    // only fields with final 'false' value are removed (or excluded) from select, query and ordering
+    readFields({someProperty: false, otherField: false}).
     update(function(parameters) {
       // some complicated logic...
       if (satisfied) {
