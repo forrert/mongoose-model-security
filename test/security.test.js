@@ -15,6 +15,8 @@ security.init();
 var TestModel = testModel.model(mongoose);
 var SimpleModel = testModel.simpleModel(mongoose);
 var ModelWithRelation = testModel.modelWithRelation(mongoose);
+var FieldSecurityModel = testModel.fieldSecurityModel(mongoose);
+var FieldSecurityRelatedModel = testModel.fieldSecurityRelatedModel(mongoose);
 
 testModel.policy(security);
 
@@ -65,6 +67,11 @@ describe('Security Spec:', function() {
     before(function(done) {
         testModel.simpleModelData(SimpleModel).then(function(document) {
             simpleDocument = document;
+            done();
+        }).catch(function(err) {
+            done(err);
+        });
+        testModel.fieldSecurityModelData(FieldSecurityModel, FieldSecurityRelatedModel).then(function() {
             done();
         }).catch(function(err) {
             done(err);
@@ -290,6 +297,58 @@ describe('Security Spec:', function() {
                     exec(function(err, document) {
                         if (err) return done(err);
                         should.not.exist(document.relatedWith);
+                        done();
+                    });
+            });
+        });
+        describe('#find with protected fields:', function() {
+            it('returns only readable fields', function(done) {
+                FieldSecurityModel.find().exec(function(err, documents) {
+                    if (err) return done(err);
+                    documents.length.should.be.eql(2);
+                    /*jshint -W030 */
+                    //noinspection BadExpressionStatementJS
+                    documents[0].name.should.be.ok;
+                    should.not.exist(documents[0].secretInformation);
+                    should.not.exist(documents[0].anotherSecretInformation);
+                    done();
+                });
+            });
+            it('ignores query for protected field', function(done) {
+                FieldSecurityModel.find().where({'secretInformation': 'another key'}).exec(function(err, documents) {
+                    if (err) return done(err);
+                    documents.length.should.be.eql(2);
+                    done();
+                });
+            });
+            it('ignores complex query for protected field', function(done) {
+                FieldSecurityModel.find()
+                    .where({$or: [{secretInformation: 'my password'}, {anotherSecretInformation: 'not so secret'}]})
+                    .exec(function(err, documents) {
+                        if (err) return done(err);
+                        documents.length.should.be.eql(2);
+                        done();
+                    });
+            });
+            it('ignores sorting with protected field', function(done) {
+                FieldSecurityModel.find().sort('name secretInformation').exec(function(err, normalSort) {
+                    if (err) return done(err);
+                    FieldSecurityModel.find().sort('name -secretInformation').exec(function(err, minusSort) {
+                        if (err) return done(err);
+                        normalSort[0].should.be.eql(minusSort[0]);
+                        done();
+                    });
+                });
+            });
+            it('returns only readable fields and relations in #populate', function(done) {
+                FieldSecurityModel.find()
+                    .populate('unprotectedRelation').populate('protectedRelation')
+                    .exec(function(err, documents) {
+                        if (err) return done(err);
+                        documents.length.should.be.eql(2);
+                        should.not.exist(documents[0].protectedRelation);
+                        should.exist(documents[0].unprotectedRelation);
+                        should.not.exist(documents[0].unprotectedRelation.hidden);
                         done();
                     });
             });

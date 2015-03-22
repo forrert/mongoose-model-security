@@ -41,6 +41,42 @@ module.exports.modelWithRelation = function(mongoose) {
     }));
 };
 
+exports.fieldSecurityRelatedModel = function(mongoose) {
+    var Schema = mongoose.Schema;
+    var FieldSecurityRelatedSchema = new Schema({
+        name: {
+            type: String
+        },
+        hidden: {
+            type: String
+        }
+    });
+    return mongoose.model('FieldSecurityRelatedModel', FieldSecurityRelatedSchema);
+};
+
+exports.fieldSecurityModel = function(mongoose) {
+    var Schema = mongoose.Schema,
+        ObjectId = Schema.ObjectId;
+    var FieldSecuritySchema = new Schema({
+        name: {
+            type: String
+        },
+        secretInformation: {
+            type: String
+        },
+        anotherSecretInformation: {
+            type: String
+        },
+        protectedRelation: {
+            type: ObjectId, ref: 'FieldSecurityRelatedModel'
+        },
+        unprotectedRelation: {
+            type: ObjectId, ref: 'FieldSecurityRelatedModel'
+        }
+    });
+    return mongoose.model('FieldSecurityModel', FieldSecuritySchema);
+};
+
 exports.policy = function(security) {
     security.buildPolicy('Activity').
         read({categories: {$in: ['sport', 'tech']}}).
@@ -51,6 +87,20 @@ exports.policy = function(security) {
         read(true).
         create(true);
     security.buildPolicy('ModelWithRelation').
+        read(true).
+        create(true);
+    security.buildPolicy('FieldSecurityRelatedModel').
+        readFields({hidden: false}). // should get overwritten by next rule
+        read(true).
+        create(true);
+    security.buildPolicy('FieldSecurityModel').
+        readFields({secretInformation: true}). // should get overwritten by next rule
+        readFields({secretInformation: false}).
+        readFields({anotherSecretInformation: true}). // should get overwritten by next rule
+        readFields(function() {
+            return {anotherSecretInformation: false};
+        }).
+        readFields({protectedRelation: false}).
         read(true).
         create(true);
 };
@@ -133,6 +183,36 @@ module.exports.createRelatedDocument = function(ModelWithRelation, document) {
         }).save(function(err, document) {
             if (err) return reject(err);
             resolve(document);
+        });
+    });
+};
+
+module.exports.fieldSecurityModelData = function(FieldSecurityModel, FieldSecurityRelatedModel) {
+    return new promise(function(resolve, reject) {
+        FieldSecurityRelatedModel.create({
+            name: 'test',
+            hidden: 'hidden password'
+        }, function(err, relatedDocument) {
+            if (err) return reject(err);
+            FieldSecurityModel.create({
+                name: 'test',
+                secretInformation: 'my password',
+                anotherSecretInformation: 'not so secret',
+                protectedRelation: relatedDocument,
+                unprotectedRelation: relatedDocument
+            }, function(err, document) {
+                if (err) return reject(err);
+                FieldSecurityModel.create({
+                    name: '2nd document',
+                    secretInformation: 'another key',
+                    anotherSecretInformation: 'empty',
+                    protectedRelation: relatedDocument,
+                    unprotectedRelation: relatedDocument
+                }, function(err, document) {
+                    if (err) return reject(err);
+                    resolve(document);
+                });
+            });
         });
     });
 };
