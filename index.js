@@ -9,7 +9,8 @@ var _ = require('lodash'),
     policyLoader = require('./lib/policyloader'),
     policyBuilder = require('./lib/policybuilder'),
     securityManager = require('./lib/securitymanager'),
-    pluginProvider = require('./lib/pluginprovider');
+    pluginProvider = require('./lib/pluginprovider'),
+    queryHook = require('./lib/queryhook');
 
 function Security() {
     this.modelProviders = [];
@@ -18,144 +19,12 @@ function Security() {
     this.policyBuilder = new policyBuilder(this.policy);
 }
 
-var findFunctions = ['find', 'findOne', 'findById'];
-
-// the arguments variable is not a proper array, this turns it into an array to make standard array function available
-var asArray = function(args) {
-    var result = [];
-    for (var i = 0; i < args.length; i++) {
-        result.push(args[i]);
-    }
-    return result;
-};
-
-// strap the callback from a find function (if present) to ensure query.exec is being called
-var strapCallback = function(name) {
-    var model = mongoose.Model;
-    var func = model[name];
-    model[name] = function() {
-        var args = asArray(arguments);
-        if (_.isFunction(_.last(args))) {
-            var newArgs = args.slice(0, -1);
-            var query;
-            if (newArgs.length === 0) {
-                query = func.apply(this);
-            } else {
-                query = func.apply(this, newArgs);
-            }
-            return query.exec(_.last(args));
-        } else {
-            return func.apply(this, args);
-        }
-    };
-};
-
 /**
  * Initialize security. This needs to be called before initializing models in mongoose.
  */
 Security.prototype.init = function() {
-    var self = this;
     mongoose.plugin(this.getPlugin());
-
-    _.forEach(findFunctions, function(func) {
-        strapCallback(func);
-    });
-
-    var query = mongoose.Query;
-    _.assign(query, hooks);
-    query.hook(query.exec, query.prototype.exec);
-    query.pre('exec', function(next) {
-        var query = this;
-        if (self.securityManager.isPrivileged()) {
-            return next();
-        } else {
-            self.policy.getCondition(query.model.modelName, 'readFields').then(function(fields) {
-                if (fields) {
-                    applyFieldReadPermissions(query, fields);
-                }
-
-                // add read conditions after adding field security - otherwise read permissions could get
-                // modified (ignored) because of field security
-                self.policy.getCondition(query.model.modelName, 'read').then(function(condition) {
-                    query.where(condition);
-                    return next();
-                }).catch(function(error) {
-                    next(error);
-                });
-            }).catch(function(error) {
-                next(error);
-            });
-        }
-    });
-};
-
-var applyFieldReadPermissions = function(query, fields) {
-    var includesDefined = hasIncludedFieldsDefined(query);
-
-    _.forOwn(fields, function(readAllowed, fieldName) {
-        if (readAllowed) {
-            return;
-        }
-        applySelection(query, includesDefined, fieldName);
-        cleanSort(query.options, fieldName);
-        cleanQuery(query._conditions, fieldName);
-    });
-};
-
-var hasIncludedFieldsDefined = function(query) {
-    var includesDefined = false;
-    if (query._fields) {
-        _.forOwn(query._fields, function(value) {
-            if (value) {
-                includesDefined = true;
-            }
-        });
-    }
-    return includesDefined;
-};
-
-var applySelection = function(query, includesDefined, fieldName) {
-    if (includesDefined) { // we cannot mix excludes and includes, so only remove includes when existing
-        delete query._fields[fieldName];
-        if (_.isEmpty(query._fields)) { // in case no field is selected more, select id so that no other fields are exposed which are probably protected
-            query.select('_id');
-        }
-    } else {
-        query.select('-' + fieldName); // 'populate' is handled here also
-    }
-};
-
-var cleanSort = function(options, fieldName) {
-    if (options && options.sort) {
-        if (options.sort[fieldName]) {
-            delete options.sort[fieldName];
-        }
-    }
-};
-
-var cleanQuery = function(conditions, fieldName) {
-    if (conditions) {
-        var cleanQueryRecursively = function(conditions) {
-            _.forOwn(conditions, function(conditionValue, conditionKey) {
-                if (conditionKey === fieldName) {
-                    delete conditions[conditionKey];
-                }
-                if (conditionValue instanceof Array) {
-                    var hasNonEmptyValue = false;
-                    _.forEach(conditionValue, function(arrayItem) {
-                        cleanQueryRecursively(arrayItem);
-                        if (!_.isEmpty(arrayItem)) {
-                            hasNonEmptyValue = true;
-                        }
-                    });
-                    if (!hasNonEmptyValue) { // remove empty arrays (like '{'$or': []}')
-                        delete conditions[conditionKey];
-                    }
-                }
-            });
-        };
-        cleanQueryRecursively(conditions);
-    }
+    queryHook.registerHooks(this.policy, this.securityManager);
 };
 
 /**
