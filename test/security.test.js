@@ -183,10 +183,18 @@ describe('Security Spec:', function() {
                 });
             });
             it('returns only returns readable document for find all query with callback', function(done) {
-                TestModel.find({}, function(err, documents) {
+                TestModel.find(function(err, documents) {
                     if (err) return done(err);
                     var orderedDocuments = _.sortBy(documents, '_id');
                     orderedDocuments.should.be.eql(_.sortBy(testDocuments.read.yes, '_id'));
+                    done();
+                });
+            });
+            it('returns only returns readable documents for conditional find query with callback', function(done) {
+                TestModel.find({categories: 'music'}, function(err, documents) {
+                    if (err) return done(err);
+                    documents.length.should.be.eql(1);
+                    documents[0].should.be.eql(testDocuments.read.yes[2]);
                     done();
                 });
             });
