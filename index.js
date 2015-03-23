@@ -2,7 +2,6 @@
 
 var _ = require('lodash'),
     promise = require('promise'),
-    mongoose = require('mongoose'),
     hooks = require('hooks'),
     util = require('./lib/util.js'),
     policy = require('./lib/policy.js'),
@@ -12,20 +11,16 @@ var _ = require('lodash'),
     pluginProvider = require('./lib/pluginprovider'),
     queryHook = require('./lib/queryhook');
 
-function Security() {
+function Security(mongoose) {
+    this.mongoose = mongoose;
     this.modelProviders = [];
     this.securityManager = new securityManager();
     this.policy = new policy(this.modelProviders, this.securityManager);
     this.policyBuilder = new policyBuilder(this.policy);
-}
 
-/**
- * Initialize security. This needs to be called before initializing models in mongoose.
- */
-Security.prototype.init = function() {
     mongoose.plugin(this.getPlugin());
-    queryHook.registerHooks(this.policy, this.securityManager);
-};
+    queryHook.registerHooks(mongoose, this.policy, this.securityManager);
+}
 
 /**
  * Load policies for all models in the database. This should be called after initializing models in mongoose.
@@ -38,7 +33,7 @@ Security.prototype.init = function() {
  * @param {function} config.defaultPolicy an optional function to build the policy for each model that does not have an own policy file
  */
 Security.prototype.loadPolicy = function(config) {
-    policyLoader(this, mongoose, config);
+    policyLoader(this, this.mongoose, config);
 };
 
 /**
@@ -106,4 +101,4 @@ Security.prototype.addModelProvider = function(modelProvider) {
 
 Security.prototype.unauthorized = require('./lib/unauthorized');
 
-module.exports = new Security();
+module.exports = Security;

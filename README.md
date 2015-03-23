@@ -29,8 +29,8 @@ Please note that this module does not automatically install `mongoose`.
 ## Mongoose Security Made Easy
 1. Define a policy for each of your models
   ```javascript
-  var security = require('mongoose-model-security');
-  
+  var security;
+
   security.buildPolicy('MyModel').
     read({someProperty: 'someValue'}).
     // only fields with final 'false' value are removed (or excluded) from select, query and ordering
@@ -51,13 +51,13 @@ Please note that this module does not automatically install `mongoose`.
 2. Initialize Security with `mongoose`
   ```javascript
   var mongoose = require('mongoose'),
-      security = require('mongoose-model-security');
+      Security = require('mongoose-model-security');
 
   // setup mongoose / connection
   // ...
 
   // initialize security
-  security.init();
+  var security = new Security(mongoose);
 
   // load your models
   // ...
@@ -120,7 +120,7 @@ in as the only argument. The parameters object contains the following properties
 - **user defined**: user defined parameters can be provided using the following
   method:
   ```javascript
-  var security = require('mongoose-model-security');
+  var security;
 
   security.addModelProvider(function() {
     var myValue;

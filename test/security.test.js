@@ -4,13 +4,13 @@ var mongoose = require('mongoose'),
     mockgoose = require('mockgoose'),
     should = require('should'),
     promise = require('promise'),
-    security = require('../index'),
+    Security = require('../index'),
     testModel = require('./mongoose.test.model'),
     _ = require('lodash');
 
 mockgoose(mongoose);
 
-security.init();
+var security = new Security(mongoose);
 
 var TestModel = testModel.model(mongoose);
 var SimpleModel = testModel.simpleModel(mongoose);

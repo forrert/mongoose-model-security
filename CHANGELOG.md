@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0 (WIP)
+- main module (security) is not a singleton anymore, but can be and must be
+  instantiated, providing a mongoose instance. Any security related operations
+  should be done on this instance.
+- policy files loaded by ```security#loadPolicy``` must now export a function
+  taking the ```security``` instance as the only parameter
+- introduce field level read permissions ([PR](https://github.com/forrert/mongoose-model-security/pull/1))
+- some refactorings around query hook
+
 ## 0.0.4 (Feb 25, 2015)
 - update some dependencies
 
