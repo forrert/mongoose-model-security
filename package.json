@@ -14,6 +14,9 @@
     "access control"
   ],
   "author": "Thomas Forrer <forrert@gmail.com>",
+  "contributors": [{
+      "name": "Urs Wolfer"
+  }],
   "license": "MIT",
   "dependencies": {
     "hooks": "0.3.2",

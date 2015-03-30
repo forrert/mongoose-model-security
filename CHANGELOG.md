@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 (WIP)
+## 1.0.0 (Mar 30, 2015)
 - main module (security) is not a singleton anymore, but can be and must be
   instantiated, providing a mongoose instance. Any security related operations
   should be done on this instance.
