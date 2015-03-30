@@ -1,6 +1,6 @@
 {
   "name": "mongoose-model-security",
-  "version": "0.0.4",
+  "version": "1.0.0",
   "description": "Data driven access control layer for mongoose.",
   "main": "index.js",
   "scripts": {
