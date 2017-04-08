@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "gulp test",
+    "lint": "gulp lint",
     "coverage": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec",
     "coveralls": "istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js --verbose"
   },
@@ -14,9 +15,11 @@
     "access control"
   ],
   "author": "Thomas Forrer <forrert@gmail.com>",
-  "contributors": [{
+  "contributors": [
+    {
       "name": "Urs Wolfer"
-  }],
+    }
+  ],
   "license": "MIT",
   "dependencies": {
     "hooks": "0.3.2",
@@ -32,8 +35,8 @@
     "istanbul": "0.3.8",
     "jshint-stylish": "1.0.1",
     "mocha": "2.2.1",
-    "mockgoose": "1.10.7",
-    "mongoose": "3.8.25",
+    "mongo-in-memory": "0.0.5",
+    "mongoose": "4.9.3",
     "proxyquire": "1.4.0",
     "should": "5.2.0"
   },
