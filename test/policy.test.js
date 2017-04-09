@@ -201,14 +201,14 @@ describe('Policy Spec:', function() {
             aRule = {userId: '{{userId}}'},
             anotherRule = {date: {$gt: '{{today}}'}};
 
-        it('replaces a parameter in rule', function(done) {
+        xit('replaces a parameter in rule', function(done) {
             var policy = new policyCtor([aModelProvider], securityManager);
             policy.addRule(aModel, aPermission, aRule);
             var condition = policy.getCondition(aModel, aPermission);
 
             assertCondition(condition, {userId: 'joe'}, done);
         });
-        it('replaces multiple parameters in rules', function(done) {
+        xit('replaces multiple parameters in rules', function(done) {
             var policy = new policyCtor([aModelProvider, anotherModelProvider], securityManager);
             policy.addRule(aModel, aPermission, aRule);
             policy.addRule(aModel, aPermission, anotherRule);
@@ -216,7 +216,7 @@ describe('Policy Spec:', function() {
 
             assertCondition(condition, {$or: [{userId: aUserId}, {date: {$gt: aDate}}]}, done);
         });
-        it('throws an exception if a parameter is absent', function(done) {
+        xit('throws an exception if a parameter is absent', function(done) {
             var policy = new policyCtor([aModelProvider], securityManager);
             var aRuleWithAbsentParameter = {userId: '{{adminId}}'};
 
