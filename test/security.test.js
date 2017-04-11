@@ -1,14 +1,14 @@
 'use strict';
 
 var mongoose = require('mongoose'),
-    mockgoose = require('mockgoose'),
+    MongoInMemory = require('mongo-in-memory'),
     should = require('should'),
     promise = require('promise'),
     Security = require('../index'),
     testModel = require('./mongoose.test.model'),
     _ = require('lodash');
 
-mockgoose(mongoose);
+mongoose.Promise = global.Promise;
 
 var security = new Security(mongoose);
 
@@ -36,15 +36,25 @@ var testDocuments = {
 };
 
 var simpleDocument;
+var mongoServer = new MongoInMemory();
 
 describe('Security Spec:', function() {
+    before(function(done) {
+        mongoServer.start(function(err) {
+            if (err) return done(err);
+            var uri = mongoServer.getMongouri('unit-tests');
+            mongoose.connect(uri, function(err) {
+                done(err);
+            });
+        });
+    });
+
     before(function(done) {
         testModel.testData(security, mongoose, TestModel).then(function(testData) {
             security.securityManager.privileged(function() {
                 TestModel.find({}).exec(function(err, documents) {
                     if (err) {
-                        done(err);
-                        return;
+                        return done(err);
                     }
                     _.forEach(documents, function(document) {
                         var permissions = testData[document._id];
@@ -59,8 +69,6 @@ describe('Security Spec:', function() {
                     done();
                 });
             });
-        }).catch(function(err) {
-            done(err);
         });
     });
 
@@ -71,6 +79,9 @@ describe('Security Spec:', function() {
         }).catch(function(err) {
             done(err);
         });
+    });
+
+    before(function(done) {
         testModel.fieldSecurityModelData(FieldSecurityModel, FieldSecurityRelatedModel).then(function() {
             done();
         }).catch(function(err) {
@@ -79,8 +90,12 @@ describe('Security Spec:', function() {
     });
 
     after(function(done) {
-        mockgoose.reset();
-        done();
+        mongoose.disconnect(function(err) {
+            if (err) return done(err);
+            mongoServer.stop(function(err) {
+                done(err);
+            });
+        });
     });
 
     describe('#askPermission Spec:', function() {

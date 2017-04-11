@@ -1,3 +1,5 @@
+'use strict';
+
 var gulp = require('gulp'),
     mocha = require('gulp-mocha'),
     jshint = require('gulp-jshint'),

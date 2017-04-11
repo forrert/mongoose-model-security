@@ -8,8 +8,7 @@ var _ = require('lodash'),
     policyLoader = require('./lib/policyloader'),
     policyBuilder = require('./lib/policybuilder'),
     securityManager = require('./lib/securitymanager'),
-    pluginProvider = require('./lib/pluginprovider'),
-    queryHook = require('./lib/queryhook');
+    pluginProvider = require('./lib/pluginprovider');
 
 function Security(mongoose) {
     this.mongoose = mongoose;
@@ -19,7 +18,6 @@ function Security(mongoose) {
     this.policyBuilder = new policyBuilder(this.policy);
 
     mongoose.plugin(this.getPlugin());
-    queryHook.registerHooks(mongoose, this.policy, this.securityManager);
 }
 
 /**
