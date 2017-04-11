@@ -22,9 +22,8 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "hooks": "0.3.2",
-    "lodash": "3.6.0",
-    "promise": "6.1.0"
+    "lodash": "4.17.4",
+    "promise": "7.1.1"
   },
   "devDependencies": {
     "coveralls": "2.11.2",

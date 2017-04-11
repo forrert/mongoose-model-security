@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.0 (Apr 10, 2017)
+- support latest mongoose version
+- refactor query hook to use built-in mongoose hooks
+- removed support for templates in rules
+
 ## 1.0.0 (Mar 30, 2015)
 - main module (security) is not a singleton anymore, but can be and must be
   instantiated, providing a mongoose instance. Any security related operations
