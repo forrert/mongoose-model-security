@@ -2,7 +2,6 @@
 
 var _ = require('lodash'),
     promise = require('promise'),
-    hooks = require('hooks'),
     util = require('./lib/util.js'),
     policy = require('./lib/policy.js'),
     policyLoader = require('./lib/policyloader'),
@@ -61,13 +60,13 @@ Security.prototype.getPermissions = function(document, permissions) {
     if (_.isString(permissions)) {
         permissions = [permissions];
     }
-    var decisions = _.map(permissions, function(permission) {
+    var decisions = _.map(permissions, (permission) => {
         return this.askPermission(document, permission).then(function(decision) {
             var result = {};
             result[permission] = decision;
             return result;
         });
-    }, this);
+    });
     return promise.all(decisions).then(function(decisionArray) {
         return _.reduce(decisionArray, function(result, item) {
             return _.assign(result, item);
